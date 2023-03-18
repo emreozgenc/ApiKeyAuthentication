@@ -37,7 +37,6 @@ namespace ApiKeyAuthentication.API.Authorization.ApiKey
 
             var claimsIdentity = new ClaimsIdentity(claims, ApiKeyAuthenticationOptions.DefaultSchema);
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-
             var ticket = new AuthenticationTicket(claimsPrincipal, ApiKeyAuthenticationOptions.DefaultSchema);
 
             return AuthenticateResult.Success(ticket);
@@ -50,6 +49,10 @@ namespace ApiKeyAuthentication.API.Authorization.ApiKey
         {
             return builder.AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(ApiKeyAuthenticationOptions.DefaultSchema, options);
         }
-    }
 
+        public static AuthenticationBuilder AddApiKey(this AuthenticationBuilder builder)
+        {
+            return builder.AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(ApiKeyAuthenticationOptions.DefaultSchema, null!);
+        }
+    }
 }

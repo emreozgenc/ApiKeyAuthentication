@@ -1,5 +1,6 @@
 using ApiKeyAuthentication.API.Authorization.ApiKey;
-using ApiKeyAuthentication.API.Data.Entities;
+using ApiKeyAuthentication.API.Cache.Abstract;
+using ApiKeyAuthentication.API.Cache.Concrete;
 using ApiKeyAuthentication.API.Data.EntityFramework;
 using ApiKeyAuthentication.API.Data.Repositories.Abstract;
 using ApiKeyAuthentication.API.Data.Repositories.Concrete;
@@ -18,24 +19,18 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<IClientService, ClientManager>();
 builder.Services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+builder.Services.AddScoped<ICacheService, CacheManager>();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
 });
 
 builder.Services.AddAuthentication()
-    .AddApiKey(options => { });
+    .AddApiKey();
 
-builder.Services.AddAuthorization(configure =>
-{
-    //configure.AddPolicy("DefaultPolicy", policy =>
-    //{
-    //    policy.RequireAuthenticatedUser()
-    //    .RequireClaim("permission", "blogs.read")
-    //    .AddAuthenticationSchemes(ApiKeyAuthenticationOptions.DefaultSchema)
-    //    .Build();
-    //});
-});
+builder.Services.AddMemoryCache();
+builder.Services.AddAuthorization();
 
 builder.Services.AddSwaggerGen(c => {
     c.AddSecurityDefinition(ApiKeyAuthenticationOptions.DefaultSchema, new OpenApiSecurityScheme

@@ -11,10 +11,10 @@ namespace ApiKeyAuthentication.API.Controllers
     public class ValuesController : ControllerBase
     {
         [HttpGet]
-        [Authorize(AuthenticationSchemes = ApiKeyAuthenticationOptions.DefaultSchema, Roles = "blogs.write")]
+        [Authorize(AuthenticationSchemes = $"{ApiKeyAuthenticationOptions.DefaultSchema}", Roles = "blogs.read")]
         public IActionResult Get()
         {
-            return Ok("Başarılı");
+            return Ok("Succeeded");
         }
     }
 }
