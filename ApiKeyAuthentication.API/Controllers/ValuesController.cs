@@ -1,4 +1,4 @@
-﻿using ApiKeyAuthentication.API.Authorization.ApiKey;
+﻿using ApiKeyAuthentication.API.Authentication.ApiKey;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 
-namespace ApiKeyAuthentication.API.Authorization.ApiKey
+namespace ApiKeyAuthentication.API.Authentication.ApiKey
 {
     public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthenticationOptions>
     {
@@ -16,21 +16,21 @@ namespace ApiKeyAuthentication.API.Authorization.ApiKey
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            if(!Request.Headers.TryGetValue(ApiKeyAuthenticationOptions.HeaderName, out var apiKey) || apiKey.Count != 1)
+            if (!Request.Headers.TryGetValue(ApiKeyAuthenticationOptions.HeaderName, out var apiKey) || apiKey.Count != 1)
             {
                 return AuthenticateResult.Fail($"{ApiKeyAuthenticationOptions.HeaderName} not provided");
             }
 
             var permissions = await _clientService.GetPermissionAsync(apiKey);
-            
-            if(!permissions.Any())
+
+            if (!permissions.Any())
             {
                 return AuthenticateResult.Fail("failed");
             }
 
             var claims = new List<Claim>();
 
-            foreach(var permission in permissions)
+            foreach (var permission in permissions)
             {
                 claims.Add(new Claim(ClaimTypes.Role, permission));
             }
@@ -45,7 +45,7 @@ namespace ApiKeyAuthentication.API.Authorization.ApiKey
 
     public static class ApiKeyAuthenticationExtensions
     {
-        public static AuthenticationBuilder AddApiKey(this AuthenticationBuilder builder, Action<ApiKeyAuthenticationOptions> options) 
+        public static AuthenticationBuilder AddApiKey(this AuthenticationBuilder builder, Action<ApiKeyAuthenticationOptions> options)
         {
             return builder.AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(ApiKeyAuthenticationOptions.DefaultSchema, options);
         }

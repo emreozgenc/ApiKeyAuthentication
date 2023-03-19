@@ -1,4 +1,4 @@
-using ApiKeyAuthentication.API.Authorization.ApiKey;
+using ApiKeyAuthentication.API.Authentication.ApiKey;
 using ApiKeyAuthentication.API.Cache.Abstract;
 using ApiKeyAuthentication.API.Cache.Concrete;
 using ApiKeyAuthentication.API.Data.EntityFramework;
