@@ -6,16 +6,16 @@ using System.Text.Encodings.Web;
 
 namespace ApiKeyAuthentication.API.Authentication.ApiKey
 {
-    public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthenticationOptions>
+    public class ApiKeyAlternativeAuthenticationHandler : AuthenticationHandler<ApiKeyAuthenticationOptions>
     {
         private readonly IClientService _clientService;
         private readonly string _headerName;
         private readonly string _defaultSchema;
-        public ApiKeyAuthenticationHandler(IOptionsMonitor<ApiKeyAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, IClientService clientService) : base(options, logger, encoder, clock)
+        public ApiKeyAlternativeAuthenticationHandler(IOptionsMonitor<ApiKeyAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, IClientService clientService) : base(options, logger, encoder, clock)
         {
             _clientService = clientService;
-            _headerName = ApiKeyAuthenticationOptions.HeaderName;
-            _defaultSchema = ApiKeyAuthenticationOptions.DefaultScheme;
+            _headerName = ApiKeyAuthenticationOptions.HeaderName + "-alternative";
+            _defaultSchema = ApiKeyAuthenticationOptions.DefaultScheme + "Alternative";
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()

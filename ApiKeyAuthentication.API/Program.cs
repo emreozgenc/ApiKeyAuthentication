@@ -6,6 +6,7 @@ using ApiKeyAuthentication.API.Data.Repositories.Abstract;
 using ApiKeyAuthentication.API.Data.Repositories.Concrete;
 using ApiKeyAuthentication.API.Services.Abstract;
 using ApiKeyAuthentication.API.Services.Concrete;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -26,14 +27,32 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
 });
 
-builder.Services.AddAuthentication()
-    .AddApiKey();
+builder.Services.AddAuthentication(ApiKeyAuthenticationOptions.DefaultScheme + "Alternative")
+    .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(ApiKeyAuthenticationOptions.DefaultScheme, _ => { })
+    .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAlternativeAuthenticationHandler>(ApiKeyAuthenticationOptions.DefaultScheme + "Alternative", options =>
+    {
+        options.ForwardDefaultSelector = context =>
+        {
+            if(!context.Request.Headers.TryGetValue(ApiKeyAuthenticationOptions.HeaderName + "-alternative", out var apiKey))
+                return ApiKeyAuthenticationOptions.DefaultScheme;
+
+            return null;
+        };
+    });
 
 builder.Services.AddMemoryCache();
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(configure =>
+{
+    configure.DefaultPolicy = new AuthorizationPolicyBuilder()
+                                .AddAuthenticationSchemes(ApiKeyAuthenticationOptions.DefaultScheme,
+                                ApiKeyAuthenticationOptions.DefaultScheme + "Alternative")
+                                .RequireAuthenticatedUser()
+                                .Build();
+});
 
-builder.Services.AddSwaggerGen(c => {
-    c.AddSecurityDefinition(ApiKeyAuthenticationOptions.DefaultSchema, new OpenApiSecurityScheme
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition(ApiKeyAuthenticationOptions.DefaultScheme, new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
         Name = ApiKeyAuthenticationOptions.HeaderName,
@@ -47,7 +66,29 @@ builder.Services.AddSwaggerGen(c => {
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = ApiKeyAuthenticationOptions.DefaultSchema
+                    Id = ApiKeyAuthenticationOptions.DefaultScheme
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+
+    c.AddSecurityDefinition(ApiKeyAuthenticationOptions.DefaultScheme + "Alternative", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Name = ApiKeyAuthenticationOptions.HeaderName + "-alternative",
+        Type = SecuritySchemeType.ApiKey,
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = ApiKeyAuthenticationOptions.DefaultScheme + "Alternative"
                 }
             },
             Array.Empty<string>()
